@@ -8,7 +8,7 @@ def get_basename(filename):
     """Strip path and extension. Return basename."""
     return os.path.splitext(os.path.basename(filename))[0]
 
-def open_images(directory):
+def open_images_in(directory):
     """Open all images in a directory. Return tuple of Image instances."""
     return [Image.open(file) for file in os.listdir(directory)]
 
