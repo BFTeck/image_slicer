@@ -137,6 +137,99 @@ def slice(filename, number_tiles, save=True):
                    directory=os.path.dirname(filename))
     return tuple(tiles)
 
+def slice_by_size(filename, number_tiles_row, number_tiles_col, save=True):
+    """
+    Split an image into a specified number of tiles.
+
+    Args:
+       filename (str):  The filename of the image to split.
+       number_tiles (int):  The number of tiles required.
+
+    Kwargs:
+       save (bool): Whether or not to save tiles to disk.
+
+    Returns:
+        Tuple of :class:`Tile` instances.
+    """
+    im = Image.open(filename)
+    number_tiles=number_tiles_row * number_tiles_col
+    validate_image(im, number_tiles)
+
+    im_w, im_h = im.size
+    columns = number_tiles_col
+    rows = number_tiles_row
+    extras = (columns * rows) - number_tiles
+    tile_w, tile_h = int(floor(im_w / columns)), int(floor(im_h / rows))
+
+    tiles = []
+    number = 1
+    for pos_y in range(0, im_h - rows, tile_h): # -rows for rounding error.
+        for pos_x in range(0, im_w - columns, tile_w): # as above.
+            area = (pos_x, pos_y, pos_x + tile_w, pos_y + tile_h)
+            image = im.crop(area)
+            position = (int(floor(pos_x / tile_w)) + 1,
+                        int(floor(pos_y / tile_h)) + 1)
+            coords = (pos_x, pos_y)
+            tile = Tile(image, number, position, coords)
+            tiles.append(tile)
+            number += 1
+    if save:
+        save_tiles(tiles,
+                   prefix=get_basename(filename),
+                   directory=os.path.dirname(filename))
+    return tuple(tiles)
+
+def slice_by_px(filename, px_tiles_row, px_tiles_col, save=True):
+    """
+    Split an image into a specified number of tiles.
+
+    Args:
+       filename (str):  The filename of the image to split.
+       number_tiles (int):  The number of tiles required.
+
+    Kwargs:
+       save (bool): Whether or not to save tiles to disk.
+
+    Returns:
+        Tuple of :class:`Tile` instances.
+    """
+    im = Image.open(filename)
+
+    im_w, im_h = im.size
+
+    extras_row=im_w % px_tiles_row
+    extras_col= im_h % px_tiles_col
+
+    if extras_col<> 0 :
+        columns = (im_h // px_tiles_col)+1
+    else:
+        columns = (im_h // px_tiles_col)
+    if extras_row <> 0:
+        rows = (im_w // px_tiles_row)+1
+    else:
+        rows = (im_w // px_tiles_row)
+
+    tile_w = px_tiles_row
+    tile_h = px_tiles_col
+
+    tiles = []
+    number = 1
+    for pos_y in range(0, im_h - rows, tile_h): # -rows for rounding error.
+        for pos_x in range(0, im_w - columns, tile_w): # as above.
+            area = (pos_x, pos_y, pos_x + tile_w, pos_y + tile_h)
+            image = im.crop(area)
+            position = (int(floor(pos_x / tile_w)) + 1,
+                        int(floor(pos_y / tile_h)) + 1)
+            coords = (pos_x, pos_y)
+            tile = Tile(image, number, position, coords)
+            tiles.append(tile)
+            number += 1
+    if save:
+        save_tiles(tiles,
+                   prefix=get_basename(filename),
+                   directory=os.path.dirname(filename))
+    return tuple(tiles)
+
 def save_tiles(tiles, prefix='', directory=os.getcwd(), format='png'):
     """
     Write image files to disk. Create specified folder(s) if they
