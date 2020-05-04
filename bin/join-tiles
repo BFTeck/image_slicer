@@ -18,4 +18,3 @@ args = parser.parse_args()
 
 image = join(open_images_in(args.dir))
 image.save('joined.%s'.format(args.format))
-
